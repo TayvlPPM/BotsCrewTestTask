@@ -6,13 +6,22 @@ import java.lang.String;
 public class MyTestTask
 {
 
+    public static int menuReturn(){
+        int menu;
+        System.out.println("Return to main menu 1 or any other key for exit");
+        Scanner menu_return = new Scanner(System.in);
+        menu = menu_return.nextInt();
+        if (menu!=1)menu=0;
+        return menu;
+    }
+
     public static void main(String[] args)
     {
         Connection conn = null;
         Statement st = null;
-        ResultSet rs = null;
+        ResultSet resultSet = null;
         try {
-            String myUrl = "jdbc:mysql://localhost:3306/university?createDatabaseIfNotExist=true&serverTimezone=UTC";
+            String myUrl = "jdbc:mysql://localhost:3306/university?serverTimezone=UTC";
             conn = DriverManager.getConnection(myUrl, "root", "123434v555");
             st = conn.createStatement();
             int menu;
@@ -28,64 +37,47 @@ public class MyTestTask
                 Scanner myObj = new Scanner(System.in);
                 menu = myObj.nextInt();
                 System.out.println("what are we looking for?");
-                Scanner depname = new Scanner(System.in);
-                String name = depname.nextLine();
+                Scanner input_word = new Scanner(System.in);
+                String input = input_word.nextLine();
                 switch (menu) {
                     case 1: {
                         query = "SELECT lectors.full_name " +
                                 "FROM lectors INNER JOIN departments " +
-                                "ON departments.head_of_department = lectors.id WHERE departments.name LIKE '" + name + "';";
+                                "ON departments.head_of_department = lectors.id WHERE departments.name LIKE '" + input + "';";
 
-                        rs = st.executeQuery(query);
-                        while (rs.next())
-                            System.out.println("Head of " + name + " department is "
-                                    + rs.getString("full_name"));
-                        System.out.println("Return to main menu 1 or 0 for exit");
-                        depname = new Scanner(System.in);
-                        menu = depname.nextInt();
+                        resultSet = st.executeQuery(query);
+                        while (resultSet.next())
+                            System.out.println("Head of " + input + " department is "
+                                    + resultSet.getString("full_name"));
+                        menu=menuReturn();
                     }
                     break;
                     case 2:{
-                        int a1=0,a2=0,a3=0;
-                        query = "SELECT COUNT( l.id) " +
+                        int assitant_count=0, associate_count=0, proffesor_count=0;
+                        String basequery = "SELECT COUNT( l.id) " +
                                 "FROM lectors AS l " +
                                 "INNER JOIN lectors_has_departments AS ld " +
                                 "ON l.id = ld.Lectors_idLectors " +
                                 "INNER JOIN departments AS d " +
                                 "ON d.id = ld.Departments_id_dep " +
                                 "WHERE d.name LIKE '"
-                                + name + "' AND l.degree = 'assistants';";
-                        rs = st.executeQuery(query);
-                        while (rs.next())
-                            a1=rs.getInt(1);
-                        System.out.println("Tuesday");
-                        query = "SELECT COUNT( l.id) " +
-                                "FROM lectors AS l " +
-                                "INNER JOIN lectors_has_departments AS ld " +
-                                "ON l.id = ld.Lectors_idLectors " +
-                                "INNER JOIN departments AS d " +
-                                "ON d.id = ld.Departments_id_dep " +
-                                "WHERE d.name LIKE '"
-                                + name + "' AND l.degree = 'associate professor';";
-                        rs = st.executeQuery(query);
-                        while (rs.next())
-                            a2=rs.getInt(1);
-                        query = "SELECT COUNT( l.id) " +
-                                "FROM lectors AS l " +
-                                "INNER JOIN lectors_has_departments AS ld " +
-                                "ON l.id = ld.Lectors_idLectors " +
-                                "INNER JOIN departments AS d " +
-                                "ON d.id = ld.Departments_id_dep " +
-                                "WHERE d.name LIKE '"
-                                + name + "' AND l.degree = 'professors';";
-                        while (rs.next()){
-                            a3=rs.getInt(1);}
-                        System.out.println("assistants - "+a1);
-                        System.out.println("associate professors - "+a2);
-                        System.out.println("professor - "+a3);
-                        System.out.println("Return to main menu 1 or 0 for exit");
-                        depname = new Scanner(System.in);
-                        menu = depname.nextInt();
+                                + input + "' AND l.degree = ";
+                        query = basequery + "'assistant';";
+                        resultSet = st.executeQuery(query);
+                        while (resultSet.next())
+                            assitant_count=resultSet.getInt(1);
+                        query = basequery + "'associate professor';";
+                        resultSet = st.executeQuery(query);
+                        while (resultSet.next())
+                            associate_count=resultSet.getInt(1);
+                        query = basequery + "'professor';";
+                        resultSet = st.executeQuery(query);
+                        while (resultSet.next()){
+                            proffesor_count=resultSet.getInt(1);}
+                        System.out.println("assistants - "+assitant_count);
+                        System.out.println("associate professors - "+associate_count);
+                        System.out.println("professor - "+proffesor_count);
+                        menu=menuReturn();
                     }
                     break;
                     case 3:
@@ -97,13 +89,11 @@ public class MyTestTask
                                 "INNER JOIN departments AS d " +
                                 "ON d.id = ld.Departments_id_dep " +
                                 "WHERE d.name LIKE '"
-                                + name + "';";
-                        rs = st.executeQuery(query);
-                        while (rs.next())
-                            System.out.println("The average salary of " + name + " is "+rs.getDouble(1));
-                        System.out.println("Return to main menu 1 or 0 for exit");
-                        depname = new Scanner(System.in);
-                        menu = depname.nextInt();
+                                + input + "';";
+                        resultSet = st.executeQuery(query);
+                        while (resultSet.next())
+                            System.out.println("The average salary of " + input + " is "+resultSet.getDouble(1));
+                        menu=menuReturn();
                     }
                     break;
                     case 4:
@@ -111,48 +101,44 @@ public class MyTestTask
                         query = "SELECT COUNT(lectors_has_departments.Lectors_idLectors) " +
                                 "FROM lectors_has_departments INNER JOIN departments" +
                                 " ON departments.id = lectors_has_departments.Departments_id_dep WHERE departments.name LIKE '"
-                                + name + "';";
+                                + input + "';";
 
-                        rs = st.executeQuery(query);
-                        while (rs.next())
-                            System.out.println(rs.getInt(1));
-                        System.out.println("Return to main menu 1 or 0 for exit");
-                        depname = new Scanner(System.in);
-                        menu = depname.nextInt();
+                        resultSet = st.executeQuery(query);
+                        while (resultSet.next())
+                            System.out.println(resultSet.getInt(1));
+                        menu=menuReturn();
                     }
                     break;
                     case 5:
                     {
                         query = "SELECT * " +
                                 "FROM lectors " +
-                                "WHERE id LIKE '%" + name + "%' " +
-                                "OR full_name LIKE '%"+name+"%' " +
-                                "OR degree LIKE '%"+name+"%' " +
-                                "OR salary LIKE '%"+name+"%' ;";
-                        rs = st.executeQuery(query);
-                        ResultSetMetaData rsmd = rs.getMetaData();
+                                "WHERE id LIKE '%" + input + "%' " +
+                                "OR full_name LIKE '%"+input+"%' " +
+                                "OR degree LIKE '%"+input+"%' " +
+                                "OR salary LIKE '%"+input+"%' ;";
+                        resultSet = st.executeQuery(query);
+                        ResultSetMetaData rsmd = resultSet.getMetaData();
                         int columnsNumber = rsmd.getColumnCount();
-                        while (rs.next()) {
+                        while (resultSet.next()) {
                             for (int i = 1; i <= columnsNumber; i++) {
-                                System.out.println(rs.getString(i) + " " + rsmd.getColumnName(i));
+                                System.out.println(resultSet.getString(i) + " " + rsmd.getColumnName(i));
                             }
                         }
                         query = "SELECT * " +
                                 "FROM departments " +
-                                "WHERE id LIKE '%" + name + "%' " +
-                                "OR name LIKE '%"+name+"%' ;";
-                        rs = st.executeQuery(query);
-                        rsmd = rs.getMetaData();
+                                "WHERE id LIKE '%" + input + "%' " +
+                                "OR name LIKE '%"+input+"%' ;";
+                        resultSet = st.executeQuery(query);
+                        rsmd = resultSet.getMetaData();
                         columnsNumber = rsmd.getColumnCount();
-                        while (rs.next()) {
+                        while (resultSet.next()) {
                             System.out.println("Result: ");
                             for (int i = 1; i <= columnsNumber; i++) {
-                                System.out.println(rs.getString(i) + " " + rsmd.getColumnName(i));
+                                System.out.println(resultSet.getString(i) + " " + rsmd.getColumnName(i));
                             }
                         }
-                        System.out.println("Return to main menu 1 or 0 for exit");
-                        depname = new Scanner(System.in);
-                        menu = depname.nextInt();
+                        menu=menuReturn();
                     }
                     break;
                     default:
